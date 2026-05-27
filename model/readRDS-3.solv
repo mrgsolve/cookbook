@@ -1,0 +1,13 @@
+[ plugin ] mrgx
+
+[ error ] 
+
+if(FINAL_ROW) {
+  
+  Rcpp::Function draw = 
+    mrgx::readRDS<Rcpp::Function>("data/draw.rds");
+  
+  Rcpp::NumericVector numbers = draw(1000);
+  
+  mrgx::assign("numbers", numbers, self);
+}

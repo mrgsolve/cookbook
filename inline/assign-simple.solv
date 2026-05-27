@@ -1,0 +1,9 @@
+[ plugin ] mrgx
+
+[ error ] 
+
+static local_double cumtime = 0; 
+cumtime += TIME;
+
+mrgx::assign("cumtime", cumtime, self);
+

@@ -1,0 +1,11 @@
+[ plugin ] mrgx
+
+[ error ] 
+
+if(FINAL_ROW) {
+  
+  Rcpp::NumericVector random = 
+    mrgx::readRDS<Rcpp::NumericVector>("data/random.rds");
+  
+  mrgx::assign("random", random, self);
+}

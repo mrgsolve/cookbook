@@ -1,0 +1,26 @@
+---
+freeze: false
+---
+
+```{r, include = FALSE}
+source("setup.R")
+```
+
+
+# Introduction {.unnumbered}
+
+<img src="images/MRG-Solve-Hex.png" align="right" width="200px"></img> Welcome to
+the mrgsolve cookbook. 
+
+## Other Resources {.unnumbered}
+
+- Main resource page: [mrgsolve.github.io](https://mrgsolve.github.io)
+- Vignettes: [mrgsolve.github.io/vignettes](https://mrgsolve.github.io/vignettes)
+- R documentation: [mrgsolve.github.io/docs](https://mrgsolve.github.io/docs)
+- Gallery: [github.com/mrgsolve/gallery](https://github.com/mrgsolve/gallery) 
+
+
+<hr>
+
+This book was assembled on `r date()` with mrgsolve version `r packageVersion("mrgsolve")`. 
+

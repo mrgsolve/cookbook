@@ -1,0 +1,109 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## `mrgx::assign()`
+
+### Trivial example
+
+The `assign()` function lets you write data generated in the model 
+code to the model environment. The arguments follow the order in 
+`base::assign()`:
+
+- `"name"` - the name of the object you want to write
+- `value` - the value to assign to `name`
+- `self` - the model self object
+
+As a trivial example, we sum up `TIME` through the duration of the 
+simulation, writing out `cumtime` at every step.
+
+```{mread, stem = "assign-simple", annot = TRUE}
+[ plugin ] mrgx
+
+[ error ] 
+
+static local_double cumtime = 0; 
+cumtime += TIME;
+
+mrgx::assign("cumtime", cumtime, self);
+
+```
+
+```{r}
+mod <- mread("inline/assign-simple.solv")
+
+out <- mrgsim(mod)
+```
+
+To get teh value of `cumtime`, use `env_get()`: 
+```{r}
+env_get(out, "cumtime")
+```
+
+The model object holds the environment we are writing to and the output
+object contains a copy of the model object. So you can call `env_get()` on 
+either the model object (`mod`) or the output object (`out`). If you 
+already coerced the simulated output to a data frame, you can always go back
+and fetch your assigned data through the model object. In this sense, it is 
+probably safer to just always loo in the model object. 
+
+Note, also, that we are writing `cumtime` out at every single data set 
+time step, but we only get to see the final value. It would be more efficient
+if we only wrote the data once the problem was finished. Read through the 
+next example to see how to do this.
+
+### More involved
+
+
+In this example, we will collect simulation outputs in an object inside 
+the model as the simulation progresses. Once the simulation is finished, 
+we will (manually) create a data frame of the output and `assign()` it 
+into the model environment. 
+
+
+```{r}
+mod <- mread("model/assign.solv")
+```
+
+The key part of the code is found below. In `$ERROR`, we will "push" the 
+current values of `TIME` and `DV` into the back of the collection 
+object. Then, when we detect that we are on the last (final) row of the 
+problem, we'll (i) create a data frame with all the data and (ii) 
+`assign()` it to the model environment.
+
+```{c, eval = FALSE}
+[ error ] 
+
+Time.push_back(TIME);
+Dv.push_back(A/V);
+
+if(FINAL_ROW) {
+  Rcpp::DataFrame data = Rcpp::DataFrame::create(
+    Rcpp::Named("TIME") = Time, 
+    Rcpp::Named("DV") = Dv
+  );
+  mrgx::assign("data", data, self);
+}
+```
+
+
+
+```{c, code = mod@code, eval = FALSE}
+
+```
+
+
+```{r}
+out <- mrgsim(mod, end = -1, add = c(0,240))
+
+out
+```
+
+
+```{r}
+data <- env_get(mod, "data")
+
+head(data)
+
+ggplot(data, aes(TIME,DV)) + geom_line()
+```

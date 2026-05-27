@@ -1,0 +1,11 @@
+[ plugin ] mrgx
+
+[ error ] 
+
+if(FINAL_ROW) {
+  
+  Rcpp::DataFrame mtc = 
+    mrgx::readRDS<Rcpp::DataFrame>("data/mtcars.rds");
+  
+  mrgx::assign("data", mtc, self);
+}

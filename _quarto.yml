@@ -1,0 +1,27 @@
+project:
+  type: book
+  output-dir: docs
+execute:
+  freeze: auto  # re-render only when source changes
+book:
+  title: "mrgsolve cookbook"
+  favicon: images/MRG-Solve-Hex.png
+  author: "Kyle Baron"
+  date: "today"
+  date-format: long
+  chapters:
+    - index.qmd
+    - part: "mrgx plugin"
+      chapters: 
+        - mrgx-assign.qmd
+        - mrgx-rds.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    linkcolor: "#097f5f"
+  # pdf:
+  #   documentclass: scrreprt
+  #   toc-depth: 2

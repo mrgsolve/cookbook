@@ -1,0 +1,152 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## `mrgx::readRDS()`
+
+You can read an R object from an `.rds` file. To do this, use the templated 
+function `mrgx::readRDS()`. This is a templated function because you have to 
+specify the type of object coming back from the `.rds` file in the function 
+call. 
+
+### DataFrame example
+
+For example, let's take the `mtcars` data frame on a round trip: 
+
+1. Write the data frame to an `.rds` file
+2. Compile a model that reads in the data frame from the `.rds` file
+3. Assign the data frame object to the model environment
+3. Get the object from the model environment
+
+This is obviously a trivial example and normally, you'd _do_ something with 
+the object. But hopefully this will clearly illustrate how to use 
+`mrgx::readRDS()`.
+
+
+First, create the file.
+
+```{r}
+saveRDS(mtcars, "data/mtcars.rds")
+```
+
+
+Now, we'll use this model to read in the `.rds` file. 
+
+```{c, eval = FALSE, filename = "model/readRDS-1.solv", code = readLines("model/readRDS-1.solv")}
+
+```
+
+Notice that the function call is:
+
+```{c, eval = FALSE}
+Rcpp::DataFrame mtc = mrgx::readRDS<Rcpp::DataFrame>("<filename>");
+```
+
+We have to not only tell the compiler about the type of object we are assigning
+to `mtc`, but we also have to specialize the `mrgx::readRDS()` function, saying
+we want a version that returns `Rcpp::DataFrame`. 
+
+
+```{r}
+mod <- mread("model/readRDS-1.solv")
+```
+
+Just simulate from the model
+
+```{r}
+out <- mrgsim(mod)
+```
+
+Now, go into the model object and `get()` the data frame
+
+```{r}
+env_get(mod, "data") %>% head()
+```
+
+```{r}
+#| echo: false
+unlink("data/mtcars.rds")
+```
+
+
+### NumericVector example
+
+If the `.rds` file contained a `NumericVector`, you'd have to tell the
+compiler that detail like this
+
+
+```{c, eval = FALSE, filename = "model/readRDS-2.solv", code = readLines("model/readRDS-2.solv")}
+
+```
+
+
+Now let's round-trip this vector or random numbers
+
+```{r}
+set.seed(1234)
+
+x <- rnorm(10)
+
+saveRDS(x, file = "data/random.rds")
+
+mod <- mread("model/readRDS-2.solv")
+
+out <- mrgsim(mod)
+
+env_get(mod, "random")
+```
+
+```{r}
+#| echo: false
+unlink("data/random.rds")
+```
+
+### Function example
+
+You could also use this mechanism as a way to call an R function in your model.
+
+This is a function factory, creating a function to do a random draw from a 
+fixed `mean` and `sd`.
+
+```{r}
+makef <- function(mean, sd) {
+  force(mean)
+  force(sd)
+  function(n) {
+    rnorm(n, mean, sd)  
+  }
+}
+
+saveRDS(object = makef(100, 10), file = "data/draw.rds")
+```
+
+Load this model.
+
+```{c, eval = FALSE, filename = "model/readRDS-3.solv", code = readLines("model/readRDS-3.solv")}
+
+```
+
+Here, we get the function from the `.rds` file and call it, asking 
+for 1000 replicates using the `mean` and `sd` specified above.
+
+
+```{r}
+mod <- mread("model/readRDS-3.solv")
+```
+
+Simulate and get the results. 
+
+```{r}
+out <- mrgsim(mod)
+
+x <- env_get(mod, "numbers")
+
+hist(x)
+```
+
+Again, these are all just simple examples to show you how you can shuttle R
+objects into your mrgsolve model. If you needed this functionality, you'd more 
+than likely call the function or work with the object coming from the `.rds` 
+file in your model. If you did need to check on what happened, you can always 
+`assign()` like we do here to see the object once the simulation ends.
+
