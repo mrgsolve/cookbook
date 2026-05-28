@@ -1,0 +1,15 @@
+[ plugin] mrgx
+
+[ env ] 
+
+set.seed(1023)
+numbers <- rnorm(10)
+
+[ table ] 
+
+Rcpp::NumericVector numbers = 
+  mrgx::get<Rcpp::NumericVector>("numbers", self);
+
+if(self.irown < numbers.size()-1) {
+  capture number = numbers.at(self.irown);
+}

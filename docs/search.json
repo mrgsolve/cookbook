@@ -14,7 +14,7 @@
     "href": "index.html#other-resources",
     "title": "mrgsolve cookbook",
     "section": "Other Resources",
-    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Wed May 27 17:46:29 2026 with mrgsolve version 2.0.1.",
+    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Thu May 28 07:21:15 2026 with mrgsolve version 2.0.1.",
     "crumbs": [
       "Introduction"
     ]
@@ -39,6 +39,17 @@
     "crumbs": [
       "mrgx plugin",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>`mrgx::readRDS()`</span>"
+    ]
+  },
+  {
+    "objectID": "mrgx-get.html",
+    "href": "mrgx-get.html",
+    "title": "3  mrgx::get()",
+    "section": "",
+    "text": "Every mrgsolve model object contains a R environment where you can maintain R objects, typically for use in your model. We will use mrgx::get() inside the model to get access to that object.\nFirst, let’s create a toy model, with an object seeded in the model environment.\n\nmod &lt;- mread(\"model/mrgx-get-1.solv\")\n\n. Building mrgx-get-1_solv ... done.\n\n\nThis object now has a numeric vector named numbers in the model environment.\n\nenv_get(mod, \"numbers\")\n\n.  [1] -0.6765114  1.6417261 -0.2369903  0.9579535 -0.8514430 -0.3593212\n.  [7]  0.8978122 -1.4875644 -1.1101949  1.5163280\n\n\nNow, let’s get() that object in a [ table ] block.\n\nmod &lt;- mread(\"model/mrgx-get-2.solv\")\n\n. Building mrgx-get-2_solv ... done.\n\n\n\nmrgsim(mod, end = 10)\n\n. Model:  mrgx-get-2_solv \n. Dim:    11 x 3 \n. Time:   0 to 10 \n. ID:     1 \n.     ID time  number\n. 1:   1    0 -0.6765\n. 2:   1    1  1.6417\n. 3:   1    2 -0.2370\n. 4:   1    3  0.9580\n. 5:   1    4 -0.8514\n. 6:   1    5 -0.3593\n. 7:   1    6  0.8978\n. 8:   1    7 -1.4876",
+    "crumbs": [
+      "mrgx plugin",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>`mrgx::get()`</span>"
     ]
   }
 ]

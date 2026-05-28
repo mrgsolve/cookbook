@@ -1,0 +1,32 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## `mrgx::get()`
+
+Every mrgsolve model object contains a R environment where you can maintain 
+R objects, typically for use in your model. We will use `mrgx::get()` inside
+the model to get access to that object. 
+
+First, let's create a toy model, with an object seeded in the model environment.
+
+```{r}
+mod <- mread("model/mrgx-get-1.solv")
+```
+
+This object now has a numeric vector named `numbers` in the model environment.
+
+```{r}
+env_get(mod, "numbers")
+```
+
+Now, let's `get()` that object in a `[ table ]` block.
+
+```{r}
+mod <- mread("model/mrgx-get-2.solv")
+```
+
+```{r}
+mrgsim(mod, end = 10)
+```
+

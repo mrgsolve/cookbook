@@ -1,0 +1,6 @@
+[ plugin] mrgx
+
+[ env ] 
+
+set.seed(1023)
+numbers <- rnorm(10)
