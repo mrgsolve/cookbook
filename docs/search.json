@@ -14,7 +14,7 @@
     "href": "index.html#other-resources",
     "title": "mrgsolve cookbook",
     "section": "Other Resources",
-    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Fri May 29 06:26:43 2026 with mrgsolve version 2.0.1.",
+    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Fri May 29 11:01:41 2026 with mrgsolve version 2.0.1.",
     "crumbs": [
       "Introduction"
     ]
@@ -53,14 +53,36 @@
     ]
   },
   {
+    "objectID": "evtools-0.html",
+    "href": "evtools-0.html",
+    "title": "4  A single dose",
+    "section": "",
+    "text": "For each individual, you can execute a single dose. In this example, it’s a bolus dose.\n\nUse the evtools plugin\nThe dynamic dosing stuff goes in the [ event ] block\nCall evt::bolus() to create the basic dose\nThen push() the object back to mrgsolve\n\n\n\n\nmodel/evtools-0.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\n\n[ pkmodel ] advan = 2\n\n[ event ] \n\nif(NEWIND &gt; 1) return; \n\nevt::ev dose = evt::bolus(DOSE, 1); \nself.push(dose); \n\n[ error ] capture CP = A2/V;\n\n\nWe don’t pass in a dosing data set; this is executed in the model itself.\n\nmod &lt;- mread(\"model/evtools-0.solv\")\n\n. Building evtools-0_solv ... done.\n\nout &lt;- mrgsim(mod, end = 48, delta = 0.1)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>A single dose</span>"
+    ]
+  },
+  {
+    "objectID": "evtools-1.html",
+    "href": "evtools-1.html",
+    "title": "5  DIY regimen",
+    "section": "",
+    "text": "For each individual, you can set up a dosing regimen. In this example, we do bolus dosing.\n\nUse the evtools plugin\nThe dynamic dosing stuff goes in the [ event ] block\nCall evt::bolus() to create the basic dose\nCall evt::ii() to set the dosing interval\nCall evt::addl() to schedule additional doses\nThen push() the object back to mrgsolve\n\n\n\n\nmodel/evtools-1.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\nINTERVAL = 24\nTOTAL = 10\n\n[ pkmodel ] advan = 2\n\n[ event ] \n\nif(NEWIND &gt; 1) return; \n\nevt::ev dose = evt::bolus(DOSE, 1); \nevt::ii(dose, INTERVAL); \nevt::addl(dose, TOTAL-1); \nself.push(dose); \n\n[ error ]  capture CP = A2/V;\n\n\nWe put in 10 total doses with a 24 hour dosing interval; so we need to make sure the simulation end time covers the doses we scheduled. But we don’t pass in a dosing data set; this is executed in the model itself.\n\nmod &lt;- mread(\"model/evtools-1.solv\")\n\n. Building evtools-1_solv ... done.\n\nout &lt;- mrgsim(mod, end = 360, delta = 0.25)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>DIY regimen</span>"
+    ]
+  },
+  {
     "objectID": "mrg-report.html",
     "href": "mrg-report.html",
-    "title": "4  mrg::report()",
+    "title": "6  mrg::report()",
     "section": "",
     "text": "When debugging model code, it is sometimes helpful to write print statements at strategic locations to see what is happening during the model run.\nIn this example, we are infusing a dose over 2 hours and want to check the concentration at the end of the infusion. For simplicity, we’ll just print that value to the console.\n\n\n\nmodel/mrg-report-1.solv\n\n[ pkmodel ] advan = 1\n\n[ param ] CL = 1, V = 70\n\n[ table ] \n\nif(END_OF_INFUSION) mrg::report(A1/V);\n\n\n\nmod &lt;- mread(\"model/mrg-report-1.solv\")\n\n. Building mrg-report-1_solv ... done.\n\n\n\ndose &lt;- ev(amt = 100, tinf = 4)\n\nout &lt;- mrgsim(mod, dose)\n\n\n\n. from report 1.38852\n\n\nThe obvious downside to this approach is you can easily flood the console with outputs that are hard to make sense of. In that case, you can use a more controlled approach, saving each value you eventually want reported and then assigning those objects into the model environment. An example is shown here.\n\n\n\nmodel/mrg-report-2.solv\n\n[ plugin ] mrgx\n\n[ global ] \nstd::deque&lt;double&gt; eof;\n\n[ pkmodel ] advan = 1\n\n[ param ] CL = 1, V = 70\n\n[ table ] \nif(NEWIND &lt;= 1) eof.clear();\n\nif(END_OF_INFUSION) eof.push_back(A1/V);\n\nif(FINAL_ROW) {\n  mrgx::assign(\"eof\", eof, self);\n}\n\n\n\nmod &lt;- mread(\"model/mrg-report-2.solv\")\n\n. Building mrg-report-2_solv ... done.\n\ndose &lt;- mutate(dose, ii = 24, addl = 3)\n\nout &lt;- mrgsim(mod, dose, end = 240, delta = 0.1)\n\nout &lt;- mutate_sims(out, CP = A1/mod$V)\n\nplot(out, CP ~ time)\n\n\n\n\n\n\n\n\nTo pull the data from the model environment, you run:\n\nenv_get(mod, \"eof\")\n\n. [1] 1.388522 2.374010 3.073451 3.569871",
     "crumbs": [
       "Debugging",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>`mrg::report()`</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>`mrg::report()`</span>"
     ]
   }
 ]

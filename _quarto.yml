@@ -16,6 +16,10 @@ book:
         - mrgx-assign.qmd
         - mrgx-get.qmd
         - mrgx-rds.qmd
+    - part: evtools
+      chapters:
+        - evtools-0.qmd
+        - evtools-1.qmd
     - part: Debugging
       chapters:
         - mrg-report.qmd    

@@ -1,0 +1,32 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## A single dose
+
+For each individual, you can execute a single dose. In this example, it's a bolus dose.
+
+- Use the `evtools` plugin
+- The dynamic dosing stuff goes in the `[ event ]` block
+- Call `evt::bolus()` to create the basic dose
+- Then `push()` the object back to mrgsolve
+
+
+```{c, eval = FALSE, filename = "model/evtools-0.solv", code = readLines("model/evtools-0.solv")}
+
+```
+
+We 
+don't pass in a dosing data set; this is executed in the model itself.
+
+
+```{r}
+mod <- mread("model/evtools-0.solv")
+
+out <- mrgsim(mod, end = 48, delta = 0.1)
+
+plot(out)
+```
+
+
+
