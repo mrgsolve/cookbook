@@ -1,0 +1,17 @@
+[ plugin ] mrgx
+
+[ global ] 
+std::deque<double> eof;
+
+[ pkmodel ] advan = 1
+
+[ param ] CL = 1, V = 70
+
+[ table ] 
+if(NEWIND <= 1) eof.clear();
+
+if(END_OF_INFUSION) eof.push_back(A1/V);
+
+if(FINAL_ROW) {
+  mrgx::assign("eof", eof, self);
+}

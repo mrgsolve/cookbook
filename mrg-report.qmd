@@ -1,0 +1,60 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## `mrg::report()`
+
+When debugging model code, it is sometimes helpful to write
+print statements at strategic locations to see what is happening
+during the model run. 
+
+In this example, we are infusing a dose over 2 hours and want to 
+check the concentration at the end of the infusion. For simplicity, 
+we'll just print that value to the console. 
+
+```{c, eval = FALSE, filename = "model/mrg-report-1.solv", code = readLines("model/mrg-report-1.solv")}
+
+```
+
+```{r}
+mod <- mread("model/mrg-report-1.solv")
+```
+
+```{r}
+dose <- ev(amt = 100, tinf = 4)
+
+out <- mrgsim(mod, dose)
+```
+
+```{r, echo = FALSE}
+cat("from report 1.38852")
+```
+
+
+The obvious downside to this approach is you can easily flood the console with 
+outputs that are hard to make sense of. In that case, you can use a more 
+controlled approach, saving each value you eventually want reported and 
+then assigning those objects into the model environment. An example is shown
+here. 
+
+```{c, eval = FALSE, filename = "model/mrg-report-2.solv", code = readLines("model/mrg-report-2.solv")}
+
+```
+
+
+```{r}
+mod <- mread("model/mrg-report-2.solv")
+
+dose <- mutate(dose, ii = 24, addl = 3)
+
+out <- mrgsim(mod, dose, end = 240, delta = 0.1)
+
+out <- mutate_sims(out, CP = A1/mod$V)
+
+plot(out, CP ~ time)
+```
+
+To pull the data from the model environment, you run:
+```{r}
+env_get(mod, "eof")
+```

@@ -1,0 +1,7 @@
+[ pkmodel ] advan = 1
+
+[ param ] CL = 1, V = 70
+
+[ table ] 
+
+if(END_OF_INFUSION) mrg::report(A1/V);

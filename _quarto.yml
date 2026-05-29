@@ -14,9 +14,11 @@ book:
     - part: "mrgx plugin"
       chapters: 
         - mrgx-assign.qmd
-        - mrgx-rds.qmd
         - mrgx-get.qmd
-
+        - mrgx-rds.qmd
+    - part: Debugging
+      chapters:
+        - mrg-report.qmd    
 bibliography: references.bib
 
 format:
