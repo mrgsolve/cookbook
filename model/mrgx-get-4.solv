@@ -1,0 +1,15 @@
+[ plugin] mrgx
+
+[ table ] 
+
+if(FINAL_ROW) {
+
+  Rcpp::Function seq = mrgx::get<Rcpp::Function>("base", "seq");
+  
+  Rcpp::Function asgn = mrgx::get<Rcpp::Function>("base", "assign");
+
+  Rcpp::IntegerVector idx = seq(100);
+
+  asgn("indices", idx, Rcpp::Environment::global_env());
+  
+}

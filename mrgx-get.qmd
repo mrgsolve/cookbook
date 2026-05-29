@@ -4,11 +4,18 @@ source("setup.R")
 
 ## `mrgx::get()`
 
+### Get from model environment
+
 Every mrgsolve model object contains a R environment where you can maintain 
 R objects, typically for use in your model. We will use `mrgx::get()` inside
 the model to get access to that object. 
 
+
 First, let's create a toy model, with an object seeded in the model environment.
+
+```{c, eval = FALSE, filename = "model/mrgx-get-1.solv", code = readLines("model/mrgx-get-1.solv")}
+
+```
 
 ```{r}
 mod <- mread("model/mrgx-get-1.solv")
@@ -22,6 +29,13 @@ env_get(mod, "numbers")
 
 Now, let's `get()` that object in a `[ table ]` block.
 
+```{c, eval = FALSE, filename = "model/mrgx-get-2.solv", code = readLines("model/mrgx-get-2.solv")}
+
+```
+
+In this example, we grab a numeric vector from the model environment and 
+copy some of the numbers into the simulated output.
+
 ```{r}
 mod <- mread("model/mrgx-get-2.solv")
 ```
@@ -29,4 +43,83 @@ mod <- mread("model/mrgx-get-2.solv")
 ```{r}
 mrgsim(mod, end = 10)
 ```
+
+You can also update an object in the model environment to a different value
+and simulate again.
+
+```{r}
+mod <- env_update(mod, numbers = runif(30, 2, 4))
+
+mrgsim(mod)
+```
+
+or use `base::assign`:
+
+```{r}
+vec <- -rnorm(30, 82, 10)
+
+assign("numbers", envir = env_get_env(mod), vec)
+
+mrgsim(mod)
+```
+
+
+### Get from global environment
+
+You can also get an object from the global environment. 
+
+```{c, eval = FALSE, filename = "model/mrgx-get-3.solv", code = readLines("model/mrgx-get-3.solv")}
+
+```
+
+```{r}
+magic_number <- 98765
+
+mod <- mread("model/mrgx-get-3.solv")
+
+mrgsim(mod)
+```
+
+Note that this model requires you to have `magic_number` defined in the 
+global environment _at run time_. While you _can_ do this, it would be 
+_better_ if you defined `magic_number` in the model environment, so the 
+definition stays with the model.
+
+
+### Get from a package
+
+In this example, we `get()` some functions from `base` and assign an 
+integer vector back into the global environment.
+
+```{c, eval = FALSE, filename = "model/mrgx-get-4.solv", code = readLines("model/mrgx-get-4.solv")}
+
+```
+
+Check that `indices` doesn't exist.
+```{r}
+exists("indices")
+```
+
+Now load and simulate from the model.
+
+```{r}
+
+mod <- mread("model/mrgx-get-4.solv")
+
+out <- mrgsim(mod)
+```
+
+During the model run, we've called `base::seq()` to generate a sequence
+of integers, then called `base::assign()` to assign to an `indices` object
+in the global environment. 
+
+```{r}
+exists("indices")
+
+indices
+```
+
+Again, assigning to the global environment probably isn't the safest thing 
+to do. We included and environment in the model to give you a safe place
+to assign and get R objects during the model run.
 

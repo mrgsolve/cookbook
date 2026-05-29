@@ -1,0 +1,9 @@
+[ plugin] mrgx
+
+[ table ] 
+
+Rcpp::NumericVector magic_n = 
+  mrgx::get<Rcpp::NumericVector>("magic_number");
+
+capture magic = magic_n.at(0);
+
