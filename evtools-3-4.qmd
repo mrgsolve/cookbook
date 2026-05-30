@@ -1,0 +1,60 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## Dose by dose regimen
+
+Previous vignettes showed how to schedule a series of doses into the future. 
+This vignette shows a dosing regimen that proceds dose-by-dose. This approach 
+is the gateway to doing highly-customized adaptive dosing. 
+
+In this example, we dose by infusion.
+
+- Use the `evtools` plugin
+- The dynamic dosing stuff goes in the `[ event ]` block
+- Whenever `TIME` matches up with the expected dosing time 
+  (based on `INTERVAL`), we trigger a dose.
+- Then `push()` the object back to mrgsolve
+
+
+## Check next dose using `std::fmod()`
+
+```{c, eval = FALSE, filename = "model/evtools-3.solv", code = readLines("model/evtools-3.solv")}
+
+```
+
+```{r}
+mod <- mread("model/evtools-3.solv")
+
+out <- mrgsim(mod, end = 120, delta = 0.25)
+
+plot(out)
+```
+
+We didn't really specify a dose end time, so the dosing will go as long as we simulate.
+
+```{r}
+out <- mrgsim(mod, end = 360, delta = 0.25)
+
+plot(out)
+```
+
+## Check next dose using `evt::near()`
+
+In model 4, we have a slightly different mechanism for figuring out when 
+the `next` dose should be given - using the `evt::near()` function.
+
+
+```{c, eval = FALSE, filename = "model/evtools-4.solv", code = readLines("model/evtools-4.solv")}
+
+```
+
+The mechanics should work the same as model 3. 
+
+```{r}
+mod <- mread("model/evtools-4.solv")
+
+out <- mrgsim(mod, end = 120, delta = 0.25)
+
+plot(out)
+```

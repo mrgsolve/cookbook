@@ -14,7 +14,7 @@
     "href": "index.html#other-resources",
     "title": "mrgsolve cookbook",
     "section": "Other Resources",
-    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Fri May 29 11:03:25 2026 with mrgsolve version 2.0.1.",
+    "text": "Other Resources\n\nMain resource page: mrgsolve.github.io\nVignettes: mrgsolve.github.io/vignettes\nR documentation: mrgsolve.github.io/docs\nGallery: github.com/mrgsolve/gallery\n\n\nThis book was assembled on Fri May 29 19:54:09 2026 with mrgsolve version 2.0.1.",
     "crumbs": [
       "Introduction"
     ]
@@ -75,14 +75,69 @@
     ]
   },
   {
+    "objectID": "evtools-2.html",
+    "href": "evtools-2.html",
+    "title": "6  DIY steady-state regimen",
+    "section": "",
+    "text": "For each individual, you can set up a dosing regimen. In this example, we do bolus dosing.\n\nUse the evtools plugin\nThe dynamic dosing stuff goes in the [ event ] block\nCall evt::bolus() to create the basic dose\nCall evt::ii() to set the dosing interval\nCall evt::ss() to advance the system to pharmacokinetic steady state\nCall evt::addl() to schedule additional doses\nThen push() the object back to mrgsolve\n\n\n\n\nmodel/evtools-2.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\nINTERVAL = 24\nTOTAL = 7\n\n[ pkmodel ] advan = 2\n\n[ event ] \n\nif(NEWIND &gt; 1) return; \n\nevt::ev dose = evt::bolus(DOSE, 1); \nevt::ss(dose, 1);\nevt::ii(dose, INTERVAL); \nevt::addl(dose, TOTAL-1); \nself.push(dose); \n\n[ error ] capture CP = A2/V;\n\n\nWe put in 7 total doses with a 24 hour dosing interval; so we need to make sure the simulation end time covers the doses we scheduled. But we don’t pass in a dosing data set; this is executed in the model itself.\n\nmod &lt;- mread(\"model/evtools-2.solv\")\n\n. Building evtools-2_solv ... done.\n\nout &lt;- mrgsim(mod, end = 360, delta = 0.25)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>DIY steady-state regimen</span>"
+    ]
+  },
+  {
+    "objectID": "evtools-3-4.html",
+    "href": "evtools-3-4.html",
+    "title": "7  Dose by dose regimen",
+    "section": "",
+    "text": "7.1 Check next dose using std::fmod()\nPrevious vignettes showed how to schedule a series of doses into the future. This vignette shows a dosing regimen that proceds dose-by-dose. This approach is the gateway to doing highly-customized adaptive dosing.\nIn this example, we dose by infusion.\nmodel/evtools-3.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\nINTERVAL = 24\nOVER = 2\n\n[ pkmodel ] advan = 2\n\n[ event ] \n\nif(std::fmod(TIME, INTERVAL) == 0) {\n  evt::infuse(self, DOSE, 2, DOSE/OVER); \n}\n\n[ error ] capture CP = A2/V;\nmod &lt;- mread(\"model/evtools-3.solv\")\n\n. Building evtools-3_solv ... done.\n\nout &lt;- mrgsim(mod, end = 120, delta = 0.25)\n\nplot(out)\nWe didn’t really specify a dose end time, so the dosing will go as long as we simulate.\nout &lt;- mrgsim(mod, end = 360, delta = 0.25)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Dose by dose regimen</span>"
+    ]
+  },
+  {
+    "objectID": "evtools-3-4.html#check-next-dose-using-evtnear",
+    "href": "evtools-3-4.html#check-next-dose-using-evtnear",
+    "title": "7  Dose by dose regimen",
+    "section": "7.2 Check next dose using evt::near()",
+    "text": "7.2 Check next dose using evt::near()\nIn model 4, we have a slightly different mechanism for figuring out when the next dose should be given - using the evt::near() function.\n\n\n\nmodel/evtools-4.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\nINTERVAL = 24\nOVER = 2\nEND = 240\n\n[ pkmodel ]\n\ncmt = \"A1,A2\"\ndepot = TRUE\n\n[ event ] \n\nif(TIME &gt; END) return;\n\nif(NEWIND &lt;=1) { \n  double nextdose = 0;\n}\n\nif(evt::near(TIME, nextdose)) {\n  evt::infuse(self, DOSE, 1, DOSE/OVER); \n  nextdose = nextdose + INTERVAL;\n}\n\n[ error ] \n\ncapture CP = A2/V;\n\n\nThe mechanics should work the same as model 3.\n\nmod &lt;- mread(\"model/evtools-4.solv\")\n\n. Building evtools-4_solv ... done.\n\nout &lt;- mrgsim(mod, end = 120, delta = 0.25)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Dose by dose regimen</span>"
+    ]
+  },
+  {
+    "objectID": "evtools-5.html",
+    "href": "evtools-5.html",
+    "title": "8  Start dosing after time = 0",
+    "section": "",
+    "text": "So far, we’ve always started dosing on the first record of the simulation. In model 5, we show how to start dosing at some later time, after the simulation has been runing for a while.\nWe also show you how to turn a bolus dose into an infusion.\n\nUse the evtools plugin\nThe dynamic dosing stuff goes in the [ event ] block\nCall evt::bolus() to create the basic (bolus) dose\nCall evt::rate() to set the infusion rate\nCall evt::ss() to advance the system to pharmacokinetic steady state prior to starting the dose\nCall evt::ii() to set the dosing interval\nCall evt::addl() to schedule additional doses\nThen push() the object back to mrgsolve\n\nThe model looks like this:\n\n\n\nmodel/evtools-5.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"CP\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 2\n\nDOSE = 100\nOVER = 2\n\n\n[ pkmodel ] advan = 2\n\n[ event ] \n\nif(NEWIND &gt; 1) return; \n\nevt::ev dose = evt::bolus(DOSE, 1); \nevt::rate(dose, DOSE/OVER);\nevt::retime(dose, 72); \nevt::ss(dose, 1); \nevt::ii(dose, 24); \nevt::addl(dose, 5); \n\nself.push(dose);\n\n[ error ] \n\ncapture CP = A2/V;\n\n\nWe’ve hard-coded the interval and total number of doses for clarity; you will probably want to make the number of doses and maybe the interval a parameter so you can change those from simulation to simulation.\n\nmod &lt;- mread(\"model/evtools-5.solv\")\n\n. Building evtools-5_solv ... done.\n\nout &lt;- mrgsim(mod, end = 336, delta = 0.25)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Start dosing after time = 0</span>"
+    ]
+  },
+  {
+    "objectID": "evtools-6.html",
+    "href": "evtools-6.html",
+    "title": "9  Reset the system",
+    "section": "",
+    "text": "This is a toy example showing how to use evt::reset(). There are two compartments in the model, and we initialize the second compartment to a value (1000). At the designated times (every 72 hours) we’ll reset the system.\n\nUse the evtools plugin\nThe dynamic dosing stuff goes in the [ event ] block\nCall evt::reset() every 72 hours to reset the system\nWe pass self into evt::reset() so there is nothing to “push” back as a separate step\n\n\n\n\nmodel/evtools-6.solv\n\n[ plugin ] evtools\n\n[ set ] outvars = \"A2\"\n\n[ param ] \n\nCL = 1\nV = 32\nKA = 0\n\n[ pkmodel ] advan = 2\n\n[ pk ] \nA1_0 = 0; \nA2_0 = 1000;\n\n[ event ] \n\nif(std::fmod(TIME,72) == 0 || NEWIND &lt;= 1) {  \n  evt::reset(self);\n}\n\n[ error ] capture CP = A2/V;\n\n\n\nmod &lt;- mread(\"model/evtools-6.solv\")\n\n. Building evtools-6_solv ... done.\n\nout &lt;- mrgsim(mod, end = 72*4-0.1, delta = 1)\n\nplot(out)",
+    "crumbs": [
+      "evtools",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Reset the system</span>"
+    ]
+  },
+  {
     "objectID": "mrg-report.html",
     "href": "mrg-report.html",
-    "title": "6  mrg::report()",
+    "title": "10  mrg::report()",
     "section": "",
     "text": "When debugging model code, it is sometimes helpful to write print statements at strategic locations to see what is happening during the model run.\nIn this example, we are infusing a dose over 2 hours and want to check the concentration at the end of the infusion. For simplicity, we’ll just print that value to the console.\n\n\n\nmodel/mrg-report-1.solv\n\n[ pkmodel ] advan = 1\n\n[ param ] CL = 1, V = 70\n\n[ table ] \n\nif(END_OF_INFUSION) mrg::report(A1/V);\n\n\n\nmod &lt;- mread(\"model/mrg-report-1.solv\")\n\n. Building mrg-report-1_solv ... done.\n\n\n\ndose &lt;- ev(amt = 100, tinf = 4)\n\nout &lt;- mrgsim(mod, dose)\n\n\n\n. from report 1.38852\n\n\nThe obvious downside to this approach is you can easily flood the console with outputs that are hard to make sense of. In that case, you can use a more controlled approach, saving each value you eventually want reported and then assigning those objects into the model environment. An example is shown here.\n\n\n\nmodel/mrg-report-2.solv\n\n[ plugin ] mrgx\n\n[ global ] \nstd::deque&lt;double&gt; eof;\n\n[ pkmodel ] advan = 1\n\n[ param ] CL = 1, V = 70\n\n[ table ] \nif(NEWIND &lt;= 1) eof.clear();\n\nif(END_OF_INFUSION) eof.push_back(A1/V);\n\nif(FINAL_ROW) {\n  mrgx::assign(\"eof\", eof, self);\n}\n\n\n\nmod &lt;- mread(\"model/mrg-report-2.solv\")\n\n. Building mrg-report-2_solv ... done.\n\ndose &lt;- mutate(dose, ii = 24, addl = 3)\n\nout &lt;- mrgsim(mod, dose, end = 240, delta = 0.1)\n\nout &lt;- mutate_sims(out, CP = A1/mod$V)\n\nplot(out, CP ~ time)\n\n\n\n\n\n\n\n\nTo pull the data from the model environment, you run:\n\nenv_get(mod, \"eof\")\n\n. [1] 1.388522 2.374010 3.073451 3.569871",
     "crumbs": [
       "Debugging",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>`mrg::report()`</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>`mrg::report()`</span>"
     ]
   }
 ]

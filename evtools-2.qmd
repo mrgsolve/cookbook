@@ -1,0 +1,37 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## DIY steady-state regimen
+
+For each individual, you can set up a dosing regimen. In this example, we do bolus dosing.
+
+- Use the `evtools` plugin
+- The dynamic dosing stuff goes in the `[ event ]` block
+- Call `evt::bolus()` to create the basic dose
+- Call `evt::ii()` to set the dosing interval
+- Call `evt::ss()` to advance the system to pharmacokinetic steady state
+- Call `evt::addl()` to schedule additional doses
+- Then `push()` the object back to mrgsolve
+
+
+```{c, eval = FALSE, filename = "model/evtools-2.solv", code = readLines("model/evtools-2.solv")}
+
+```
+
+We put in 7 total doses with a 24 hour dosing 
+interval; so we need to make sure the simulation
+end time covers the doses we scheduled. But we 
+don't pass in a dosing data set; this is executed in the model itself.
+
+
+```{r}
+mod <- mread("model/evtools-2.solv")
+
+out <- mrgsim(mod, end = 360, delta = 0.25)
+
+plot(out)
+```
+
+
+

@@ -1,0 +1,30 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## Reset the system
+
+
+This is a toy example showing how to use `evt::reset()`.  There
+are two compartments in the model, and we initialize the second
+compartment to a value (`1000`). At the designated times 
+(every `72` hours) we'll reset the system.
+
+- Use the `evtools` plugin
+- The dynamic dosing stuff goes in the `[ event ]` block
+- Call `evt::reset()` every 72 hours to reset the system
+- We pass `self` into `evt::reset()` so there is nothing to "push"
+  back as a separate step
+
+```{c, eval = FALSE, filename = "model/evtools-6.solv", code = readLines("model/evtools-6.solv")}
+
+```
+
+```{r}
+mod <- mread("model/evtools-6.solv")
+
+out <- mrgsim(mod, end = 72*4-0.1, delta = 1)
+
+plot(out)
+```
+

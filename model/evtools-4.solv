@@ -13,10 +13,7 @@ INTERVAL = 24
 OVER = 2
 END = 240
 
-[ pkmodel ]
-
-cmt = "A1,A2"
-depot = TRUE
+[ pkmodel ] advan = 2
 
 [ event ] 
 
@@ -27,10 +24,8 @@ if(NEWIND <=1) {
 }
 
 if(evt::near(TIME, nextdose)) {
-  evt::infuse(self, DOSE, 1, DOSE/OVER); 
+  evt::infuse(self, DOSE, 2, DOSE/OVER); 
   nextdose = nextdose + INTERVAL;
 }
 
-[ error ] 
-
-capture CP = A2/V;
+[ error ]  capture CP = A2/V;

@@ -1,0 +1,42 @@
+```{r,echo=FALSE,message=FALSE}
+source("setup.R")
+```
+
+## Start dosing after time = 0
+
+So far, we've always started dosing on the first record of the 
+simulation. In model 5, we show how to start dosing at some 
+later time, after the simulation has been runing for a while.
+
+We also show you how to turn a bolus dose into an infusion.
+
+- Use the `evtools` plugin
+- The dynamic dosing stuff goes in the `[ event ]` block
+- Call `evt::bolus()` to create the basic (bolus) dose
+- Call `evt::rate()` to set the infusion rate
+- Call `evt::ss()` to advance the system to pharmacokinetic steady state
+  prior to starting the dose
+- Call `evt::ii()` to set the dosing interval
+- Call `evt::addl()` to schedule additional doses
+- Then `push()` the object back to mrgsolve
+
+
+
+The model looks like this:
+
+```{c, eval = FALSE, filename = "model/evtools-5.solv", code = readLines("model/evtools-5.solv")}
+
+```
+
+We've hard-coded the interval and total number of doses for clarity; you
+will probably want to make the number of doses and maybe the interval
+a parameter so you can change those from simulation to simulation. 
+
+```{r}
+mod <- mread("model/evtools-5.solv")
+
+out <- mrgsim(mod, end = 336, delta = 0.25)
+
+plot(out)
+```
+

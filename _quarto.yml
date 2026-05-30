@@ -20,6 +20,10 @@ book:
       chapters:
         - evtools-0.qmd
         - evtools-1.qmd
+        - evtools-2.qmd
+        - evtools-3-4.qmd
+        - evtools-5.qmd
+        - evtools-6.qmd
     - part: Debugging
       chapters:
         - mrg-report.qmd    

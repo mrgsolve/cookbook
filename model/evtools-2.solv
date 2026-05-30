@@ -10,12 +10,9 @@ KA = 2
 
 DOSE = 100
 INTERVAL = 24
-TOTAL = 10
+TOTAL = 7
 
-[ pkmodel ]
-
-cmt = "A1,A2"
-depot = TRUE
+[ pkmodel ] advan = 2
 
 [ event ] 
 
@@ -27,6 +24,4 @@ evt::ii(dose, INTERVAL);
 evt::addl(dose, TOTAL-1); 
 self.push(dose); 
 
-[ error ] 
-
-capture CP = A2/V;
+[ error ] capture CP = A2/V;
