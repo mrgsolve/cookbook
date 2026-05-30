@@ -1,0 +1,13 @@
+[ plugin] tad
+
+[ param ] CL = 1, V = 20
+
+[ pkmodel ] advan = 1
+
+[ error ] 
+static mrg::tadose obj(1);
+
+if(NEWIND <= 1) obj.reset();
+
+capture tad = obj.tad(self);
+

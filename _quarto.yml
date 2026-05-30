@@ -16,6 +16,9 @@ book:
         - mrgx-assign.qmd
         - mrgx-get.qmd
         - mrgx-rds.qmd
+    - part: "tad plugin"
+      chapters: 
+        - tad.qmd
     - part: evtools
       chapters:
         - evtools-0.qmd
