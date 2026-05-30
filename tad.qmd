@@ -19,6 +19,35 @@ This works well when you need `tad` in the output; but what if you'd
 like to know `tad` while the model is running. For this case, use the 
 `tad` plugin.
 
+## Simple approach
+
+The `self` object has a `.tad()` method that will give you the time 
+since last dose into any compartment. 
+
+```{c, eval = FALSE, filename = "model/tad-1.solv", code = readLines("model/tad-1.solv")}
+
+```
+
+This is easy and works well if there is dosing into just one compartment.
+
+```{r}
+mod <- mread("model/tad-1.solv")
+
+doses <- ev(amt = 100, ii = 6, addl = 3)
+
+out <- mrgsim(mod, doses, end = 48, delta = 1)
+
+head(out, 12)
+
+plot(out)
+```
+
+
+
+## More customized approach
+
+You can also use the `tad` plugin to calcuate `tad` for multiple 
+different dosing compartments.
 
 In the model, we initialize a `tadose` object in `[ error ]` using the 
 static keyword. You can take this approach if you will only need to work
@@ -29,7 +58,7 @@ for doses you want to track.
 Then call `obj.tad(self)` to get the current time after the most recent
 dose for the monitored compartment. 
 
-```{c, eval = FALSE, filename = "model/tad.solv", code = readLines("model/tad.solv")}
+```{c, eval = FALSE, filename = "model/tad-2.solv", code = readLines("model/tad-2.solv")}
 
 ```
 
@@ -37,7 +66,7 @@ Note that you _have_ to call `obj.tad(self)` on every record so the
 object can know when the doses are happening.
 
 ```{r}
-mod <- mread("model/tad.solv")
+mod <- mread("model/tad-2.solv")
 
 doses <- ev(amt = 100, ii = 6, addl = 3)
 

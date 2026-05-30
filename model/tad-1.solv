@@ -1,0 +1,7 @@
+[ param ] CL = 1, V = 20
+
+[ pkmodel ] advan = 1
+
+[ error ] 
+capture tad = self.tad();
+
